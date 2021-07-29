@@ -33,20 +33,80 @@ public class LoanAssistant extends JFrame {
         //creating frame
        new LoanAssistant().setVisible(true);
     }
-     
+    public boolean validateDecimalNumber(JTextField tf)
+    {
+        // checks to see if text field contains
+        // valid decimal number with only digits and a single decimal point
+        String s = tf.getText().trim();
+        boolean hasDecimal = false;
+        boolean valid = true;
+        if (s.length() == 0)
+        {
+            valid = false;
+        }
+        else
+        {
+            for (int i = 0; i < s.length(); i++)
+            {
+                char c = s.charAt(i);
+                if (c >= '0' && c <= '9')
+                {
+                    continue;
+                }
+                else if (c == '.' && !hasDecimal)
+                {
+                    hasDecimal = true;
+                }
+                else
+                {
+                    // invalid character found
+                    valid = false;
+                }
+            }
+        }
+        tf.setText(s);
+        if (!valid)
+        {
+            tf.requestFocus();
+        }
+        return (valid);
+    }
     private void computeButtonActionPerformed(ActionEvent e)
     {
         double balance, interest, payment;
         int months;
         double monthlyInterest, multiplier;
         double loanBalance, finalPayment;
+        if (validateDecimalNumber(balanceTextField))
+        {
         balance = Double.valueOf(balanceTextField.getText()).doubleValue();
+        }
+        else
+        {
+            JOptionPane.showConfirmDialog(null, "Invalid or empty Loan Balance entry.\nPlease correct.", "Balance Input Error", JOptionPane.DEFAULT_OPTION,JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+        if(validateDecimalNumber(interestTextField))
+        {
         interest = Double.valueOf(interestTextField.getText()).doubleValue();
+        }
+        else
+        {
+            JOptionPane.showConfirmDialog(null, "Invalid or empty Interest Rate entry.\nPlease correct.", "Interest Input Error", JOptionPane.DEFAULT_OPTION,JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
         monthlyInterest = interest / 1200;
         if(computePayment)
         {
         // Compute loan payment
-        months = Integer.valueOf(monthsTextField.getText()).intValue();
+        if (validateDecimalNumber(monthsTextField))
+        {
+            months = Integer.valueOf(monthsTextField.getText()).intValue();
+        }
+        else{
+            JOptionPane.showConfirmDialog(null, "Invalid or empty Number of Payments entry.\nPlease correct.", "Number of Payments Input Error",JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
         if (interest == 0)
         {
             payment = balance / months;
@@ -61,7 +121,29 @@ public class LoanAssistant extends JFrame {
         else
         {
             // Compute number of payments
-        payment = Double.valueOf(paymentTextField.getText()).doubleValue();
+            if (validateDecimalNumber(paymentTextField))
+            {
+             payment = Double.valueOf(paymentTextField.getText()).doubleValue();
+             if (payment <= (balance * monthlyInterest + 1.0))
+            {
+            if (JOptionPane.showConfirmDialog(null, "Minimum payment must be $" + new DecimalFormat("0.00").format((int)(balance * monthlyInterest + 1.0)) + "\n" + "Do you want to use the minimum payment?", "Input Error", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE) == JOptionPane.YES_OPTION)
+            {
+            paymentTextField.setText(new DecimalFormat("0.00").format((int)
+            (balance * monthlyInterest + 1.0)));
+            payment =
+            Double.valueOf(paymentTextField.getText()).doubleValue();
+            }
+            else
+            {
+            paymentTextField.requestFocus();
+            return;
+            }
+            }
+            }   
+            else{
+                JOptionPane.showConfirmDialog(null, "Invalid or empty Monthly Payment entry.\nPlease correct.", "Payment Input Error", JOptionPane.DEFAULT_OPTION,JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
         if (interest == 0)
         {
             months = (int)(balance / payment);
@@ -163,6 +245,23 @@ public class LoanAssistant extends JFrame {
     private void exitButtonActionPerformed(ActionEvent e)
     {
         System.exit(0);
+    }
+
+    private void balanceTextFieldActionPerformed(ActionEvent e)
+    {
+        balanceTextField.transferFocus();
+    }
+    private void interestTextFieldActionPerformed(ActionEvent e)
+    {
+        interestTextField.transferFocus();
+    }
+    private void monthsTextFieldActionPerformed(ActionEvent e)
+    {
+        monthsTextField.transferFocus();
+    }
+    private void paymentTextFieldActionPerformed(ActionEvent e)
+    {
+        paymentTextField.transferFocus();
     }
     public LoanAssistant(){
         //frame constructor
@@ -343,6 +442,34 @@ public class LoanAssistant extends JFrame {
             exitButtonActionPerformed(e);
             }
             });
+        balanceTextField.addActionListener(new ActionListener ()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                balanceTextFieldActionPerformed(e);
+            }
+        }); 
+        interestTextField.addActionListener(new ActionListener ()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                interestTextFieldActionPerformed(e);
+            }
+        });
+        monthsTextField.addActionListener(new ActionListener ()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                monthsTextFieldActionPerformed(e);
+            }
+        });
+        paymentTextField.addActionListener(new ActionListener ()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                paymentTextFieldActionPerformed(e);
+            }
+        });
         pack();
 
         Dimension screenSize=Toolkit.getDefaultToolkit().getScreenSize();
