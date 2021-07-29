@@ -39,6 +39,7 @@ public class LoanAssistant extends JFrame {
         double balance, interest, payment;
         int months;
         double monthlyInterest, multiplier;
+        double loanBalance, finalPayment;
         balance = Double.valueOf(balanceTextField.getText()).doubleValue();
         interest = Double.valueOf(interestTextField.getText()).doubleValue();
         monthlyInterest = interest / 1200;
@@ -46,22 +47,83 @@ public class LoanAssistant extends JFrame {
         {
         // Compute loan payment
         months = Integer.valueOf(monthsTextField.getText()).intValue();
+        if (interest == 0)
+        {
+            payment = balance / months;
+        }
+        else
+        {
         multiplier = Math.pow(1 + monthlyInterest, months);
         payment = balance * monthlyInterest * multiplier / (multiplier - 1);
+        }
         paymentTextField.setText(new DecimalFormat("0.00").format(payment));
         }
         else
         {
             // Compute number of payments
         payment = Double.valueOf(paymentTextField.getText()).doubleValue();
-        months = (int)((Math.log(payment) - Math.log(payment - balance * monthlyInterest))
-        / Math.log(1 + monthlyInterest));
+        if (interest == 0)
+        {
+            months = (int)(balance / payment);
+        }
+        else
+        {
+        months = (int)((Math.log(payment) - Math.log(payment - balance * monthlyInterest)) / Math.log(1 + monthlyInterest));
+        }
         monthsTextField.setText(String.valueOf(months));
         }
+        // reset payment prior to analysis to fix at two decimals
+        payment =
+        Double.valueOf(paymentTextField.getText()).doubleValue();
+        // show analysis
+        analysisTextArea.setText("Loan Balance: $" + new
+        DecimalFormat("0.00").format(balance));
+        analysisTextArea.append("\n" + "Interest Rate: " + new
+        DecimalFormat("0.00").format(interest) + "%");
+        // process all but last payment
+        loanBalance = balance;
+        for (int paymentNumber = 1; paymentNumber <= months - 1; paymentNumber++)
+        {
+        loanBalance += loanBalance * monthlyInterest - payment;
+        }
+        // find final payment
+        finalPayment = loanBalance;
+        if (finalPayment > payment)
+        {
+        // apply one more payment
+        loanBalance += loanBalance * monthlyInterest - payment;
+        finalPayment = loanBalance;
+        months++;
+        monthsTextField.setText(String.valueOf(months));
+    }
+    analysisTextArea.append("\n\n" + String.valueOf(months - 1) + " Payments of $" + new
+    DecimalFormat("0.00").format(payment));
+    analysisTextArea.append("\n" + "Final Payment of: $" + new
+    DecimalFormat("0.00").format(finalPayment));
+    analysisTextArea.append("\n" + "Total Payments: $" + new
+    DecimalFormat("0.00").format((months - 1) * payment + finalPayment));
+    analysisTextArea.append("\n" + "Interest Paid $" + new
+    DecimalFormat("0.00").format((months - 1) * payment + finalPayment - balance));
+    computeButton.setEnabled(false);
+    newLoanButton.setEnabled(true);
+    newLoanButton.requestFocus();
     }
 
     private void newLoanButtonActionPerformed(ActionEvent e)
     {
+        // clear computed value and analysis
+        if (computePayment)
+        {
+        paymentTextField.setText("");
+        }
+        else
+        {
+        monthsTextField.setText("");
+        }
+        analysisTextArea.setText("");
+        computeButton.setEnabled(true);
+        newLoanButton.setEnabled(false);
+        balanceTextField.requestFocus();
     }
 
     private void monthsButtonActionPerformed(ActionEvent e)
