@@ -20,6 +20,7 @@ public class LoanAssistant extends JFrame {
         JTextField monthsTextField = new JTextField();      //Months TextField
         JLabel paymentLabel = new JLabel();                 //Payment Label
         JTextField paymentTextField = new JTextField();     //Payment TextField
+
         Font myFont = new Font("Arial", Font.PLAIN, 16);    //Creating object of font class
     
         //butons 
@@ -39,6 +40,7 @@ public class LoanAssistant extends JFrame {
         //creating frame
        new LoanAssistant().setVisible(true);
     }
+    
     public boolean validateDecimalNumber(JTextField tf)
     {
         // checks to see if text field contains
